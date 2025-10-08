@@ -3,6 +3,10 @@ from .routes import api
 import logging
 
 
-def init(app: FastAPI):
+def init() -> FastAPI:
+    app = FastAPI()
+
     app.include_router(api, prefix="/api")
     logging.basicConfig()
+
+    return app

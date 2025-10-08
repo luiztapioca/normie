@@ -1,6 +1,12 @@
 from fastapi import APIRouter
+from pydantic import BaseModel
 from enelvo.normaliser import Normaliser
 from ..utils import Config
+
+
+class NormaliseRequest(BaseModel):
+    msg: str
+
 
 api = APIRouter()
 normaliser = Normaliser(
@@ -15,5 +21,5 @@ def ping():
 
 
 @api.post("/normalise")
-async def do_normalise(msg: str):
-    return {"result": normaliser.normalise(msg)}
+async def do_normalise(request: NormaliseRequest):
+    return {"result": normaliser.normalise(request.msg)}
