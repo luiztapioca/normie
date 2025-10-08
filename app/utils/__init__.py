@@ -1,2 +1,3 @@
-fc_list = []
-ig_list = []
+from .config import Config
+
+__all__ = ["Config"]
