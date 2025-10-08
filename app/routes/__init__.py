@@ -1,11 +1,11 @@
 from fastapi import APIRouter
-from enelvo import normaliser
+from enelvo.normaliser import Normaliser
 from ..utils import Config
 
 api = APIRouter()
-norm = normaliser.Normaliser(
-    fc_list=list(Config.FORCE_LIST),
-    ig_list=list(Config.IGNORE_LIST),
+normaliser = Normaliser(
+    fc_list=Config.FORCE_LIST,
+    ig_list=Config.IGNORE_LIST,
 )
 
 
@@ -16,4 +16,4 @@ def ping():
 
 @api.post("/normalise")
 async def do_normalise(msg: str):
-    return str(norm.normalise(msg))
+    return {"result": normaliser.normalise(msg)}
