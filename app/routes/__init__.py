@@ -20,6 +20,6 @@ def ping():
     return "pong"
 
 
-@api.post("/normalise")
-async def do_normalise(request: NormaliseRequest):
+@api.post("/enqueue")
+def do_enqueue(request: NormaliseRequest):
     return {"result": normaliser.normalise(request.msg)}
