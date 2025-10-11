@@ -1,9 +1,5 @@
 """ Módulo responsável por armazenar instanciação do cliente Redis """
-from redis import Redis
-from ..utils import Config
+from redis.exceptions import RedisError
+from .client import get_redis
 
-r = Redis(
-    host=Config.REDIS_HOST,
-    port=Config.REDIS_PORT,
-    decode_responses=Config.REDIS_DECODE_RESPONSES
-)
+__all__ = ["RedisError", "get_redis"]
