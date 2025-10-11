@@ -12,3 +12,5 @@ class Config:
     REDIS_PORT: int = 6379
     REDIS_HOST: str = "localhost"
     REDIS_DECODE_RESPONSES: bool = True
+    REDIS_USER: str = "default"
+    REDIS_PASSWORD: str = ""

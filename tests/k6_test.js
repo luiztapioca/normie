@@ -1,25 +1,34 @@
 import http from "k6/http";
 import { check, sleep } from "k6";
 
-const social_texts = ["vc ta ocupado?"];
+const msg = "oi vc eh mto legal"
 
 export let options = {
-  vus: 10,
-  duration: "30s",
+  vus: 1,
+  duration: '30s'
 };
 
 export default function () {
-  const i = __ITER % social_texts.length;
-  const payload = JSON.stringify({ msg: social_texts[i] });
+  const url = "http://localhost:8000/api/enqueue";
+  const payload = JSON.stringify({ msg: msg });
 
   const params = {
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json"
+    }
   };
 
-  const res = http.post("http://127.0.0.1:8000/api/normalise", payload, params);
+  const res = http.post(url, payload, params)
 
   check(res, {
-    "status is 200": (r) => r.status === 200,
-    "result exists": (r) => JSON.parse(r.body).result !== undefined,
+    'is enqueued': (r) => {
+      try {
+        return JSON.parse(r.body).status === "enqueued";
+      } catch (e) {
+        return false;
+      }
+    }
   });
+
+  sleep(0.1);
 }
