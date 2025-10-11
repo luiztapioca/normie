@@ -5,7 +5,7 @@ import logging
 from fastapi import APIRouter, status, HTTPException, Depends
 from pydantic import BaseModel, Field
 from redis import Redis
-from ..redis import get_redis, RedisError
+from ..redis import get_client, RedisError
 
 
 class NormaliseRequest(BaseModel):
@@ -25,12 +25,12 @@ class NormaliseResponse(BaseModel):
 api = APIRouter()
 
 @api.post("/enqueue")
-def do_enqueue(request: NormaliseRequest,redis:Redis=Depends(get_redis)):
+def do_enqueue(request: NormaliseRequest,redis:Redis=Depends(get_client)):
     """Enfileira a mensagem"""
     try:
-        msg_id = uuid.uuid4()
-        redis.set(str(msg_id), request.msg)
-        redis.rpush("norm_queue", json.dumps({"id": str(msg_id)}))
+        msg_id = str(uuid.uuid4())
+        redis.set(msg_id, request.msg)
+        redis.rpush("norm_queue", json.dumps({"id": msg_id}))
         logging.info("Mensagem enfileirada: %s", msg_id)
 
         return NormaliseResponse(
