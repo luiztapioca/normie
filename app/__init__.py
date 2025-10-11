@@ -5,9 +5,9 @@ from .routes import api
 
 
 def init() -> FastAPI:
+    """ Módulo que instanância o FastAPI """
     app = FastAPI()
 
     app.include_router(api, prefix="/api")
-    logging.basicConfig()
 
     return app

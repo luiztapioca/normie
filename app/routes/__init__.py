@@ -31,7 +31,6 @@ def do_enqueue(request: NormaliseRequest,redis:Redis=Depends(get_client)):
         msg_id = str(uuid.uuid4())
         redis.set(msg_id, request.msg)
         redis.rpush("norm_queue", json.dumps({"id": msg_id}))
-        logging.info("Mensagem enfileirada: %s", msg_id)
 
         return NormaliseResponse(
             id=msg_id,
