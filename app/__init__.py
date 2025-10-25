@@ -1,11 +1,12 @@
-from flask import Flask
+from fastapi import FastAPI
+
 from .routes import api
 
 
-def init() -> Flask:
-    """Módulo que instanância o FastAPI"""
-    app = Flask(__name__)
+def init() -> FastAPI:
+    """Inicializa o FastAPI com logging configurado"""
+    app = FastAPI(title="Normie")
 
-    app.register_blueprint(api, prefix="/api")
+    app.include_router(api, prefix="/api")
 
     return app

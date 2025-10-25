@@ -1,32 +1,40 @@
 """Módulo de rotas do serviço"""
 
-from crypt import methods
-import uuid
 import json
-import logging
-from flask import Blueprint, Response
-from flask.json import jsonify
-from pydantic import BaseModel, Field
-from ..redis import get_client, RedisError
+import uuid
+
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
+from starlette.status import (
+    HTTP_202_ACCEPTED,
+    HTTP_400_BAD_REQUEST,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+)
+
+from ..redis import RedisError, get_client
+from ..utils import EnqueueRequest
+
+api = APIRouter()
 
 
-class NormaliseRequest(BaseModel):
-    msg: str = Field(min_length=1)
-
-
-api = Blueprint("api", __name__)
-
-
-@api.post("/enqueue", methods=["POST"])
-def do_enqueue(msg: str) -> tuple[Response, int]:
+@api.post("/enqueue")
+async def do_enqueue(request: EnqueueRequest, redis=Depends(get_client)):
     """Enfileira a mensagem"""
-    redis = get_client()
+    msg = request.msg.strip()
+
+    if not msg:
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST, detail={"error": "msg é obrigatório"}
+        )
+
     try:
         msg_id = str(uuid.uuid4())
         _ = redis.set(msg_id, msg)
         _ = redis.rpush("norm_queue", json.dumps({"id": msg_id}))
 
-        return jsonify({"id": msg_id}), 201
+        return JSONResponse(status_code=HTTP_202_ACCEPTED, content={"msg_id": msg_id})
 
     except RedisError as err:
-        return jsonify({"error": f"{err}"}), 500
+        raise HTTPException(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail={"error": err}
+        ) from err
