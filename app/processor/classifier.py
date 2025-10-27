@@ -1,4 +1,5 @@
 import logging
+from transformers import pipeline
 from ..redis import get_client
 
 # initialize -> inicialize um novo pipeline do modelo
@@ -17,17 +18,15 @@ class BERTClassifier:
     """Classe do modelo de classificacao"""
     def __init__(
         self,
-        redis = get_client,
         input_queue = "norm_queue_in",
         output_queue = "norm_queue_out",
         error_queue = "norm_queue_errors",
         model_name = "ruanchaves/bert-base-portuguese-cased-hatebr",
         num_workers = 2,
         batch_size = 8,
-        poll_timeout = 1
+        poll_timeout = 1,
     ) -> None:
 
-        self.redis = redis
         self.input_queue = input_queue
         self.output_queue = output_queue
         self.error_queue = error_queue
@@ -36,13 +35,14 @@ class BERTClassifier:
         self.batch_size = batch_size
         self.poll_timeout = poll_timeout
 
-
-    async def initialize(self):
-        """Inicializa o modelo"""
-        pass
+        self.redis_client = get_client()
+        self._running = False
 
     async def start_consuming(self):
         """Consome a fila"""
+        
+        # usar process pool executor com workers
+        
         pass
 
     async def _process_batch(self):
@@ -51,6 +51,9 @@ class BERTClassifier:
 
     def _classify_batch(self):
         """Classifica o batch"""
+        
+        # usar pipeline para pegar o modelo e classificar mensagem
+        
         pass
 
     async def _publish_results(self):
