@@ -23,7 +23,7 @@ export default function () {
   check(res, {
     'is enqueued': (r) => {
       try {
-        return JSON.parse(r.body).status === "enqueued";
+        return res.status === 202;
       } catch (e) {
         return false;
       }
