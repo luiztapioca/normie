@@ -1,4 +1,5 @@
 import logging
+from concurrent.futures import ProcessPoolExecutor
 from transformers import pipeline
 from ..redis import get_client
 
@@ -40,10 +41,10 @@ class BERTClassifier:
 
     async def start_consuming(self):
         """Consome a fila"""
+        self._running = True
         
-        # usar process pool executor com workers
-        
-        pass
+        with ProcessPoolExecutor(max_workers=self.num_workers) as executor:
+            pass
 
     async def _process_batch(self):
         """Processa o batch"""
@@ -51,9 +52,9 @@ class BERTClassifier:
 
     def _classify_batch(self):
         """Classifica o batch"""
-        
+
         # usar pipeline para pegar o modelo e classificar mensagem
-        
+
         pass
 
     async def _publish_results(self):

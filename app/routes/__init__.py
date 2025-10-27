@@ -28,7 +28,7 @@ async def do_enqueue(request: EnqueueRequest, redis=Depends(get_client)):
         )
 
     try:
-        msg_id = str(uuid.uuid4())
+        msg_id = uuid.uuid4().bytes
         _ = redis.set(msg_id, msg)
         _ = redis.rpush("norm_queue_in", json.dumps({"id": msg_id}))
 
