@@ -3,7 +3,7 @@ from .routes import api
 
 
 def init() -> FastAPI:
-    """Inicializa o FastAPI com logging configurado"""
+    """Inicializa o FastAPI"""
     app = FastAPI(title="Normie")
 
     app.include_router(api, prefix="/api")
