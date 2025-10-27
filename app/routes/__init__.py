@@ -30,7 +30,7 @@ async def do_enqueue(request: EnqueueRequest, redis=Depends(get_client)):
     try:
         msg_id = str(uuid.uuid4())
         _ = redis.set(msg_id, msg)
-        _ = redis.rpush("norm_queue", json.dumps({"id": msg_id}))
+        _ = redis.rpush("norm_queue_in", json.dumps({"id": msg_id}))
 
         return JSONResponse(status_code=HTTP_202_ACCEPTED, content={"msg_id": msg_id})
 
