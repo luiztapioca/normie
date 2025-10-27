@@ -14,6 +14,7 @@ logger = logging.getLogger("BERTClassifier")
 
 
 class BERTClassifier:
+    """Classe do modelo de classificacao"""
     def __init__(
         self,
         redis = get_client,
@@ -25,22 +26,37 @@ class BERTClassifier:
         batch_size = 8,
         poll_timeout = 1
     ) -> None:
-        pass
+
+        self.redis = redis
+        self.input_queue = input_queue
+        self.output_queue = output_queue
+        self.error_queue = error_queue
+        self.model_name = model_name
+        self.num_workers = num_workers
+        self.batch_size = batch_size
+        self.poll_timeout = poll_timeout
+
 
     async def initialize(self):
+        """Inicializa o modelo"""
         pass
 
     async def start_consuming(self):
+        """Consome a fila"""
         pass
 
     async def _process_batch(self):
+        """Processa o batch"""
         pass
 
     def _classify_batch(self):
+        """Classifica o batch"""
         pass
 
     async def _publish_results(self):
+        """Publica os resultados na fila de output"""
         pass
 
     async def stop(self):
+        """Para o modelo"""
         pass

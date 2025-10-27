@@ -4,6 +4,7 @@ import os
 
 @final
 class Config:
+    """Define variaveis uteis em toda a aplicacao"""
     BASEDIR = os.path.dirname(os.path.abspath(__file__))
 
     IGNORE_LIST: str = os.path.join(BASEDIR, "IGNORE_LIST.txt")
