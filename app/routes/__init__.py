@@ -20,9 +20,9 @@ api = APIRouter()
 @api.post("/enqueue")
 async def do_enqueue(request: EnqueueRequest, redis=Depends(get_client)):
     """Enfileira a mensagem"""
-    msg = request.msg.strip()
+    msg = request.msg
 
-    if not msg:
+    if not msg.strip():
         raise HTTPException(
             status_code=HTTP_400_BAD_REQUEST, detail={"error": "msg é obrigatório"}
         )
