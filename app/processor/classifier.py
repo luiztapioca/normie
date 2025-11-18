@@ -1,8 +1,8 @@
 import logging
 import asyncio
 import json
-from redis import RedisError
 from concurrent.futures import ProcessPoolExecutor
+from redis import RedisError
 from transformers import pipeline
 from ..redis import get_client, get_async_client
 
@@ -59,22 +59,28 @@ class BERTClassifier:
             """Fazer event loop para rodar o modelo de forma assincrona"""
             loop = asyncio.get_event_loop()
             batch = []
-            
+
             while self._running:
                 try:
                     msg_raw = await self.redis_client.brpop(
                         self.input_queue,
                         timeout=self.poll_timeout
                     )
-                    
+
                     if msg_raw:
-                        # id,msg_json = msg_raw
-                        print(msg_raw)
+                        _,msg_json = msg_raw
+                        msg_data = json.loads(msg_json)
                         
+                        batch.append(msg_data)
+                        
+                        if len(batch) >= self.batch_size:
+                            await self._process_batch(batch, executor, loop)
+                            batch = []
+
                     elif batch:
                         await self._process_batch(batch, executor, loop)
                         batch = []
-                        
+
                 except asyncio.CancelledError as e:
                     logger.info("proccess canceled: %s", e)
                     break
@@ -104,14 +110,14 @@ class BERTClassifier:
         """Para o modelo"""
         pass
 
-# async def test():
-#     try:
-#         bert = BERTClassifier()
-#     except Exception as e:
-#         print(e)
+async def test():
+    try:
+        bert = BERTClassifier()
+    except Exception as e:
+        print(e)
     
-#     await bert.initialize()
-#     return await bert.start_consuming()
+    await bert.initialize()
+    return await bert.start_consuming()
 
-# if __name__ == '__main__':
-#     asyncio.run(test())
+if __name__ == '__main__':
+    asyncio.run(test())
