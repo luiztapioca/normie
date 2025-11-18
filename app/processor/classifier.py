@@ -1,7 +1,10 @@
 import logging
+import asyncio
+import json
+from redis import RedisError
 from concurrent.futures import ProcessPoolExecutor
 from transformers import pipeline
-from ..redis import get_client
+from ..redis import get_client, get_async_client
 
 # initialize -> inicialize um novo pipeline do modelo
 # consumir do redis -> classificar por batches -> guardar resultados
@@ -36,17 +39,53 @@ class BERTClassifier:
         self.batch_size = batch_size
         self.poll_timeout = poll_timeout
 
-        self.redis_client = get_client()
+        self.redis_client = None
         self._running = False
+
+    async def initialize(self):
+        """_summary_
+        """
+        try:
+            self.redis_client = await get_async_client()
+        except RedisError as e:
+            logger.error("error initialing redis async redis client: %s", e)
+            raise
 
     async def start_consuming(self):
         """Consome a fila"""
         self._running = True
         
         with ProcessPoolExecutor(max_workers=self.num_workers) as executor:
-            pass
+            """Fazer event loop para rodar o modelo de forma assincrona"""
+            loop = asyncio.get_event_loop()
+            batch = []
+            
+            while self._running:
+                try:
+                    msg_raw = await self.redis_client.brpop(
+                        self.input_queue,
+                        timeout=self.poll_timeout
+                    )
+                    
+                    if msg_raw:
+                        # id,msg_json = msg_raw
+                        print(msg_raw)
+                        
+                    elif batch:
+                        await self._process_batch(batch, executor, loop)
+                        batch = []
+                        
+                except asyncio.CancelledError as e:
+                    logger.info("proccess canceled: %s", e)
+                    break
+                except Exception as e:
+                    logger.info("error in loop: %s", e)
+                    await asyncio.sleep(1)
 
-    async def _process_batch(self):
+            if batch:
+                await self._process_batch(batch, executor, loop)
+
+    async def _process_batch(self, batch, executor, loop):
         """Processa o batch"""
         pass
 
@@ -64,3 +103,15 @@ class BERTClassifier:
     async def stop(self):
         """Para o modelo"""
         pass
+
+# async def test():
+#     try:
+#         bert = BERTClassifier()
+#     except Exception as e:
+#         print(e)
+    
+#     await bert.initialize()
+#     return await bert.start_consuming()
+
+# if __name__ == '__main__':
+#     asyncio.run(test())
