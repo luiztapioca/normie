@@ -2,6 +2,7 @@
 
 import json
 import uuid
+from redis import Redis
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
@@ -18,7 +19,7 @@ api = APIRouter()
 
 
 @api.post("/enqueue")
-async def do_enqueue(request: EnqueueRequest, redis=Depends(get_client)):
+async def do_enqueue(request: EnqueueRequest, redis:Redis=Depends(get_client)):
     """Enfileira a mensagem"""
     msg = request.msg
 
@@ -28,9 +29,9 @@ async def do_enqueue(request: EnqueueRequest, redis=Depends(get_client)):
         )
 
     try:
-        msg_id = uuid.uuid4().bytes
+        msg_id = str(uuid.uuid4())
         _ = redis.set(msg_id, msg)
-        _ = redis.rpush("norm_queue_in", json.dumps({"id": msg_id}))
+        _ = redis.rpush("norm_queue_in", json.dumps({"id": msg_id, "msg": msg}))
 
         return JSONResponse(status_code=HTTP_202_ACCEPTED, content={"msg_id": msg_id})
 
