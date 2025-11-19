@@ -3,6 +3,7 @@ import asyncio
 import json
 from concurrent.futures import ProcessPoolExecutor
 from redis import RedisError
+from datetime import datetime
 from transformers import pipeline
 from ..redis import get_client, get_async_client
 
@@ -56,7 +57,6 @@ class BERTClassifier:
         self._running = True
         
         with ProcessPoolExecutor(max_workers=self.num_workers) as executor:
-            """Fazer event loop para rodar o modelo de forma assincrona"""
             loop = asyncio.get_event_loop()
             batch = []
 
@@ -93,22 +93,112 @@ class BERTClassifier:
 
     async def _process_batch(self, batch, executor, loop):
         """Processa o batch"""
-        pass
+        try:
+            results = await loop.run_in_executor(
+                executor,
+                self._classify_batch,
+                batch
+            )
+            
+            await self._publish_results(results)
+            
+            print(f"Completed batch of length {batch} messages")
+            
+        except Exception as e:
+            print(f"Error processing batch: {e}")
+            await self._handle_batch_error(batch, str(e))
 
-    def _classify_batch(self):
+    def _classify_batch(self, batch):
         """Classifica o batch"""
 
-        # usar pipeline para pegar o modelo e classificar mensagem
-
-        pass
-
-    async def _publish_results(self):
+        try:
+            classifier = pipeline(
+                "text-classification",
+                model=self.model_name,
+                device="mps",
+            )
+            
+            results = []
+            for message in batch:
+                try:
+                    text = message["msg"]
+                    classification = classifier(text)[0]
+                    
+                    result_message = {
+                        **message,
+                        "classification": classification,
+                        "classified_at": self._current_timestamp(),
+                        "status": "classified"
+                    }
+                    
+                    results.append(result_message)
+                    
+                except Exception as e:
+                    error_message = {
+                        **message,
+                        "error": str(e),
+                        "classified_at": self._current_timestamp(),
+                        "status": "error"
+                    }
+                    results.append(error_message)
+                    
+                return results
+        except Exception as e:
+            return[{
+                **message,
+                "error": f"Classification failed: {e}",
+                "classified_at": self._current_timestamp(),
+                "status": "error"
+            } for message in batch]
+            
+            
+    async def _publish_results(self, results):
         """Publica os resultados na fila de output"""
-        pass
+        for result in results:
+            try:
+                queue_name = self.output_queue if "classification" in result else self.error_queue
+                
+                await self.redis_client.lpush(
+                    queue_name,
+                    json.dumps(result)
+                )
+                
+                print(f"Published result for: {result.get("id")}")
+            except Exception as e:
+                print(f"Error publishing result for {result.get("id"): {e}}")
 
     async def stop(self):
         """Para o modelo"""
-        pass
+        self._running = False
+
+        if self.redis_client:
+            await self.redis_client.close()
+            
+        print("BERT classifier stopped")
+        
+
+    async def _handle_batch_error(self, batch, error):
+        """_summary_
+
+        Args:
+            batch (_type_): _description_
+            error (_type_): _description_
+        """
+        for message in batch:
+            error_result = {
+                **message,
+                "error": error,
+                "classified_at": self._current_timestamp(),
+                "status": error
+            }
+            
+            await self.redis_client.lpush(
+                self.error_queue,
+                json.dumps(error_result)
+            )
+    
+    def _current_timestamp(self):
+        return datetime.utcnow().isoformat()
 
 async def test():
     try:
