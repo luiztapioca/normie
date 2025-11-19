@@ -1,4 +1,4 @@
-"""Módulo de rotas do serviço"""
+"""Service routes module"""
 
 import json
 import uuid
@@ -20,12 +20,12 @@ api = APIRouter()
 
 @api.post("/enqueue")
 async def do_enqueue(request: EnqueueRequest, redis:Redis=Depends(get_client)):
-    """Enfileira a mensagem"""
+    """Enqueues the message"""
     msg = request.msg
 
     if not msg.strip():
         raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST, detail={"error": "msg é obrigatório"}
+            status_code=HTTP_400_BAD_REQUEST, detail={"error": "msg is required"}
         )
 
     try:

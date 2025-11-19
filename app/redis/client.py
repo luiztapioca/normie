@@ -8,11 +8,11 @@ from ..utils import Config
 
 @lru_cache(maxsize=None)
 def get_client() -> Redis:
-    """Gera um client redis que fica armazenado
-    no cache, evitando a re-instanciação
+    """Generates a Redis client that is stored
+    in cache, avoiding re-instantiation
 
     Returns:
-        Redis: cliente redis
+        Redis: Redis client
     """
     return Redis(
         host=Config.REDIS_HOST,
@@ -26,10 +26,10 @@ def get_client() -> Redis:
     )
 
 async def get_async_client() -> redis.Redis:
-    """_summary_
+    """Generates an async Redis client
 
     Returns:
-        redis.Redis: _description_
+        redis.Redis: Async Redis client
     """
     return redis.Redis(
         host=Config.REDIS_HOST,

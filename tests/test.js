@@ -5,7 +5,7 @@ const msg = "oi vc eh mto legal"
 
 export let options = {
   vus: 1,
-  duration: '10s'
+  duration: '1s'
 };
 
 export default function () {
