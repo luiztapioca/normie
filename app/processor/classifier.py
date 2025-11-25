@@ -1,10 +1,10 @@
 import asyncio
 import json
 from concurrent.futures import ProcessPoolExecutor
-from redis import RedisError
 from datetime import datetime
-from .normaliser import normaliser
+from redis import RedisError
 from transformers import pipeline
+from .normaliser import normaliser
 from ..redis import get_async_client
 from ..utils.logging_config import get_logger
 
@@ -19,7 +19,7 @@ def _classify_batch_worker(batch, model_name):
             device="mps",
         )
     except Exception as e:
-        logger.error(f"Failed to initialize classifier pipeline: {e}")
+        logger.error("Failed to initialize classifier pipeline: %s", e)
         current_time = datetime.now().isoformat()
         return [{
             **message,
@@ -45,12 +45,12 @@ def _classify_batch_worker(batch, model_name):
             try:
                 normalized_text = normaliser.normalise(text)
             except Exception as e:
-                raise RuntimeError(f"Text normalization failed: {str(e)}")
+                raise RuntimeError(f"Text normalization failed: {str(e)}") from e
             
             try:
                 classification = classifier(normalized_text)[0]
             except Exception as e:
-                raise RuntimeError(f"Classification inference failed: {str(e)}")
+                raise RuntimeError(f"Classification inference failed: {str(e)}") from e
             
             result_message = {
                 **message,
@@ -61,7 +61,7 @@ def _classify_batch_worker(batch, model_name):
             results.append(result_message)
             
         except ValueError as e:
-            logger.warning(f"Validation error for message {message.get('id', 'unknown')}: {e}")
+            logger.warning("Validation error for message %s: %s", message.get('id', 'unknown'), e)
             error_message = {
                 **message,
                 "error": str(e),
@@ -71,7 +71,7 @@ def _classify_batch_worker(batch, model_name):
             }
             results.append(error_message)
         except RuntimeError as e:
-            logger.error(f"Processing error for message {message.get('id', 'unknown')}: {e}")
+            logger.error("Processing error for message %s: %s", message.get('id', 'unknown'), e)
             error_message = {
                 **message,
                 "error": str(e),
@@ -81,7 +81,7 @@ def _classify_batch_worker(batch, model_name):
             }
             results.append(error_message)
         except Exception as e:
-            logger.exception(f"Unexpected error for message {message.get('id', 'unknown')}: {e}")
+            logger.exception("Unexpected error for message %s: %s", message.get('id', 'unknown'), e)
             error_message = {
                 **message,
                 "error": f"Unexpected error: {str(e)}",
@@ -123,7 +123,7 @@ class BERTClassifier:
         try:
             self.redis_client = await get_async_client()
         except RedisError as e:
-            logger.error("error initialing redis async redis client: %s", e)
+            logger.error("Error initializing redis async redis client: %s", e)
             raise
 
     async def start_consuming(self):
@@ -158,13 +158,13 @@ class BERTClassifier:
                     logger.info("Processing cancelled, shutting down gracefully")
                     break
                 except RedisError as e:
-                    logger.error(f"Redis connection error: {e}")
+                    logger.error("Redis connection error: %s", e)
                     await asyncio.sleep(5)
                 except json.JSONDecodeError as e:
-                    logger.error(f"Invalid JSON in message: {e}")
+                    logger.error("Invalid JSON in message: %s", e)
                     await asyncio.sleep(1)
                 except Exception as e:
-                    logger.exception(f"Unexpected error in consumer loop: {e}")
+                    logger.exception("Unexpected error in consumer loop: %s", e)
                     await asyncio.sleep(1)
 
             if batch:
@@ -182,14 +182,14 @@ class BERTClassifier:
             
             await self._publish_results(results)
             
-            logger.info(f"Completed batch of {len(batch)} messages")
+            logger.info("Completed batch of %d messages", len(batch))
             
         except asyncio.CancelledError:
             logger.warning("Batch processing was cancelled")
             await self._handle_batch_error(batch, "Batch processing cancelled")
             raise
         except Exception as e:
-            logger.exception(f"Error processing batch of {len(batch)} messages: {e}")
+            logger.exception("Error processing batch of %d messages: %s", len(batch), e)
             await self._handle_batch_error(batch, str(e))
 
     async def _publish_results(self, results):
@@ -202,22 +202,22 @@ class BERTClassifier:
                 try:
                     result_json = json.dumps(result)
                 except (TypeError, ValueError) as e:
-                    logger.error(f"Failed to serialize result for message {message_id}: {e}")
+                    logger.error("Failed to serialize result for message %s: %s", message_id, e)
                     continue
                 
                 try:
                     await self.redis_client.lpush(queue_name, result_json)
                     await self.redis_client.hset("msg_index", message_id, queue_name)
                 except RedisError as e:
-                    logger.error(f"Redis error publishing result for message {message_id}: {e}")
+                    logger.error("Redis error publishing result for message %s: %s", message_id, e)
                     raise
                 
-                logger.debug(f"Published result for message: {message_id}")
+                logger.debug("Published result for message: %s", message_id)
                 
             except RedisError:
                 raise
             except Exception as e:
-                logger.exception(f"Unexpected error publishing result for message {message_id}: {e}")
+                logger.exception("Unexpected error publishing result for message %s: %s", message_id, e)
 
     async def stop(self):
         """Stops the model"""
@@ -252,10 +252,10 @@ class BERTClassifier:
                     self.error_queue,
                     json.dumps(error_result)
                 )
-                logger.debug(f"Published batch error for message {message_id}")
+                logger.debug("Published batch error for message %s", message_id)
                 
             except Exception as e:
-                logger.error(f"Failed to publish batch error for message {message_id}: {e}")
+                logger.error("Failed to publish batch error for message %s: %s", message_id, e)
     
     def _current_timestamp(self):
         return datetime.utcnow().isoformat()
@@ -264,7 +264,7 @@ async def test():
     try:
         bert = BERTClassifier()
     except Exception as e:
-        logger.exception(f"Failed to initialize BERTClassifier: {e}")
+        logger.exception("Failed to initialize BERTClassifier: %s", e)
         return
     
     await bert.initialize()

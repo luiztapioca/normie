@@ -43,11 +43,11 @@ async def do_enqueue(
             content={"msg_id": msg_id}
         )
 
-    except RedisError as err:
+    except RedisError as e:
         raise HTTPException(
             status_code=HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={"error": err}
-        ) from err
+            detail={"error": e}
+        ) from e
 
 @api.get("/dequeue/{msg_id}")
 async def dequeue(
@@ -89,7 +89,7 @@ async def dequeue(
                 "queue": status_map.get(queue, "unknown")
             }
         )
-    except RedisError as err:
+    except RedisError as e:
         raise HTTPException(
-            status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail={"error": err}
-        ) from err
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail={"error": e}
+        ) from e
