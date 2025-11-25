@@ -259,16 +259,3 @@ class BERTClassifier:
     
     def _current_timestamp(self):
         return datetime.utcnow().isoformat()
-
-async def test():
-    try:
-        bert = BERTClassifier()
-    except Exception as e:
-        logger.exception("Failed to initialize BERTClassifier: %s", e)
-        return
-    
-    await bert.initialize()
-    return await bert.start_consuming()
-
-if __name__ == '__main__':
-    asyncio.run(test())
