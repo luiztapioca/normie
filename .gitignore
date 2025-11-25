@@ -209,3 +209,6 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+dados_metanol.csv
+dados_operacao.csv
