@@ -37,6 +37,8 @@ async def get_async_client() -> Redis:
         username=Config.REDIS_USER,
         password=Config.REDIS_PASSWORD if Config.REDIS_PASSWORD else None,
         decode_responses=Config.REDIS_DECODE_RESPONSES,
+        encoding="utf-8",
+        encoding_errors="strict",
         socket_connect_timeout=5,
         retry_on_timeout=True,
         health_check_interval=30,

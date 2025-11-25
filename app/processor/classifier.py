@@ -42,20 +42,14 @@ def _classify_batch_worker(batch, model_name):
             if not text or not text.strip():
                 raise ValueError("Empty or missing 'msg' field in message")
             
-            try:
-                normalized_text = normaliser.normalise(text)
-            except Exception as e:
-                raise RuntimeError(f"Text normalization failed: {str(e)}") from e
-            
-            try:
-                classification = classifier(normalized_text)[0]
-            except Exception as e:
-                raise RuntimeError(f"Classification inference failed: {str(e)}") from e
+            normalized_text = normaliser.normalise(text)
+            classification = classifier(normalized_text)[0]
             
             result_message = {
                 **message,
-                "classification": classification,
+                "normalized_msg": normalized_text,
                 "classified_at": current_time,
+                "classification": classification,
                 "status": "classified"
             }
             results.append(result_message)
@@ -200,7 +194,7 @@ class BERTClassifier:
                 queue_name = self.output_queue if "classification" in result else self.error_queue
                 
                 try:
-                    result_json = json.dumps(result)
+                    result_json = json.dumps(result, ensure_ascii=False)
                 except (TypeError, ValueError) as e:
                     logger.error("Failed to serialize result for message %s: %s", message_id, e)
                     continue

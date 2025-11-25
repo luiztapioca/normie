@@ -10,6 +10,7 @@ class Config:
 
     IGNORE_LIST: str = os.path.join(BASEDIR, "IGNORE_LIST.txt")
     FORCE_LIST: str = os.path.join(BASEDIR, "FORCE_LIST.txt")
+    SANITIZE: bool = True
 
     # Redis Configuration
     REDIS_PORT: int = 6379

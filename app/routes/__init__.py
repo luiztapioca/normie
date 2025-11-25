@@ -34,8 +34,9 @@ async def do_enqueue(
 
     try:
         msg_id = str(uuid.uuid4())
+
         await redis.set(msg_id, msg)
-        await redis.rpush("norm_queue_in", json.dumps({"id": msg_id, "msg": msg}))
+        await redis.rpush("norm_queue_in", json.dumps({"id": msg_id, "msg": msg}, ensure_ascii=False))
         await redis.hset("msg_index", msg_id, "norm_queue_in")
 
         return JSONResponse(
