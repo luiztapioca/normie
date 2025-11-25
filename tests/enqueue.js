@@ -20,6 +20,8 @@ export default function () {
 
   const res = http.post(url, payload, params)
 
+  console.log(res.json().msg_id)
+
   check(res, {
     'is enqueued': (r) => {
       try {
@@ -29,5 +31,4 @@ export default function () {
       }
     }
   });
-
 }

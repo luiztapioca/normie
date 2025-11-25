@@ -1,4 +1,3 @@
-import logging
 import asyncio
 import json
 from concurrent.futures import ProcessPoolExecutor
@@ -35,7 +34,6 @@ def _classify_batch_worker(batch, model_name):
     
     for message in batch:
         try:
-            # Validate message structure
             if not isinstance(message, dict):
                 raise ValueError(f"Invalid message format: expected dict, got {type(message).__name__}")
             
@@ -92,7 +90,7 @@ def _classify_batch_worker(batch, model_name):
                 "status": "error"
             }
             results.append(error_message)
-            
+
     return results
 
 class BERTClassifier:
@@ -145,9 +143,9 @@ class BERTClassifier:
                     if msg_raw:
                         _,msg_json = msg_raw
                         msg_data = json.loads(msg_json)
-                        
+
                         batch.append(msg_data)
-                        
+
                         if len(batch) >= self.batch_size:
                             await self._process_batch(batch, executor)
                             batch = []
@@ -209,6 +207,7 @@ class BERTClassifier:
                 
                 try:
                     await self.redis_client.lpush(queue_name, result_json)
+                    await self.redis_client.hset("msg_index", result_json, queue_name)
                 except RedisError as e:
                     logger.error(f"Redis error publishing result for message {message_id}: {e}")
                     raise
