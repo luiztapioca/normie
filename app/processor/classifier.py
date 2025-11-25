@@ -207,7 +207,7 @@ class BERTClassifier:
                 
                 try:
                     await self.redis_client.lpush(queue_name, result_json)
-                    await self.redis_client.hset("msg_index", result_json, queue_name)
+                    await self.redis_client.hset("msg_index", message_id, queue_name)
                 except RedisError as e:
                     logger.error(f"Redis error publishing result for message {message_id}: {e}")
                     raise
