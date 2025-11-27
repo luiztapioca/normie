@@ -47,7 +47,6 @@ def _classify_batch_worker(batch, model_name):
             
             result_message = {
                 **message,
-                "normalized_msg": normalized_text,
                 "classified_at": current_time,
                 "classification": classification,
                 "status": "classified"
