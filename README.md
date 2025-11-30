@@ -1,4 +1,4 @@
-# Classificador - Sistema de Classificação Textual com BERT
+# Sistema de Classificação Textual com BERT
 
 ## Visão Geral
 
