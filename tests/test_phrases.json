@@ -1,0 +1,38 @@
+{
+  "hate_speech": [
+    "Eu odeio essas pessoas, elas deveriam sumir daqui",
+    "Essa gente não presta, são todos uns bandidos",
+    "Que raça horrível, não deveriam existir",
+    "Voltem para o seu país, aqui não é lugar de vocês",
+    "Todas essas pessoas são nojentas e repugnantes",
+    "Eles são inferiores e não merecem respeito",
+    "Esse povo sujo deveria ser eliminado",
+    "Não aguento mais essa gentalha invadindo nossa terra",
+    "São todos uns vagabundos que só sabem roubar",
+    "Deveriam morrer todos, o mundo seria melhor"
+  ],
+  "normal_speech": [
+    "Olá, como você está hoje?",
+    "Que dia lindo, vamos aproveitar o sol",
+    "Adorei o filme que assistimos ontem",
+    "A comida estava deliciosa, parabéns ao chef",
+    "Estou muito feliz com os resultados do projeto",
+    "Vamos nos encontrar no parque às três horas",
+    "Obrigado pela ajuda, você foi muito gentil",
+    "A música brasileira é muito rica e diversa",
+    "Preciso estudar mais para a prova de amanhã",
+    "O futebol é o esporte mais popular no Brasil"
+  ],
+  "offensive_but_not_hate": [
+    "Que chatice, não aguento mais essa situação",
+    "Você é muito teimoso às vezes",
+    "Isso foi uma decisão idiota",
+    "Estou com raiva dessa burocracia toda",
+    "Que droga, perdi o ônibus de novo",
+    "Esse aplicativo é horrível, sempre trava",
+    "Que besteira, não acredito que caí nessa",
+    "Estou irritado com tanto barulho",
+    "Isso é ridículo, não vou aceitar",
+    "Que saco, está tudo fechado hoje"
+  ]
+}
