@@ -374,6 +374,8 @@ python run_classifier.py
 
 ### Testes
 
+#### Testes Manuais com cURL
+
 ```bash
 # Enfileirar mensagem
 curl -X POST "http://localhost:8000/api/enqueue" \
@@ -383,6 +385,50 @@ curl -X POST "http://localhost:8000/api/enqueue" \
 # Consultar resultado
 curl "http://localhost:8000/api/dequeue/{msg_id}"
 ```
+
+#### Testes de Carga com K6
+
+O projeto inclui uma suíte completa de testes de carga utilizando k6:
+
+**Instalação do k6:**
+```bash
+# macOS
+brew install k6
+
+# Linux
+sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+  --keyserver hkp://keyserver.ubuntu.com:80 \
+  --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
+  | sudo tee /etc/apt/sources.list.d/k6.list
+sudo apt-get update && sudo apt-get install k6
+```
+
+**Executar Testes:**
+```bash
+cd tests
+
+# Smoke test - verificação rápida
+k6 run smoke_test.js
+
+# Load test - carga padrão (10-20 usuários)
+k6 run load_test.js
+
+# Stress test - alta carga (até 150 usuários)
+k6 run stress_test.js
+
+# End-to-end test - validação completa do fluxo
+k6 run end_to_end_test.js
+```
+
+**Dataset de Teste:**
+
+Os testes utilizam 30 frases em português categorizadas em `tests/test_phrases.json`:
+- `hate_speech`: discurso de ódio explícito
+- `normal_speech`: conteúdo neutro
+- `offensive_but_not_hate`: linguagem ofensiva não caracterizada como ódio
+
+Para mais detalhes sobre os testes k6, consulte [tests/README.md](tests/README.md).
 
 ## Documentação Adicional
 
