@@ -4,7 +4,7 @@ import json
 import uuid
 from redis.asyncio import Redis
 from redis.exceptions import RedisError
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body
 from fastapi.responses import JSONResponse
 from starlette.status import (
     HTTP_202_ACCEPTED,
@@ -14,18 +14,17 @@ from starlette.status import (
     HTTP_404_NOT_FOUND
 )
 from ..redis import get_async_client
-from ..utils import EnqueueRequest
 
 api = APIRouter()
 
 
 @api.post("/enqueue")
 async def do_enqueue(
-    request: EnqueueRequest,
+    request: dict = Body(...),
     redis:Redis=Depends(get_async_client)
 ):
     """Enqueues the message"""
-    msg = request.msg
+    msg = request.get("msg", "")
 
     if not msg.strip():
         raise HTTPException(
@@ -36,7 +35,10 @@ async def do_enqueue(
         msg_id = str(uuid.uuid4())
 
         await redis.set(msg_id, msg)
-        await redis.rpush("norm_queue_in", json.dumps({"id": msg_id, "msg": msg}, ensure_ascii=False))
+        await redis.rpush(
+            "norm_queue_in",
+            json.dumps({"id": msg_id, "msg": msg},ensure_ascii=False)
+        )
         await redis.hset("msg_index", msg_id, "norm_queue_in")
 
         return JSONResponse(
