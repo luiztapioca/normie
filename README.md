@@ -1,4 +1,4 @@
-# Sistema de Classificação Textual com BERT
+# Classificador - Sistema de Classificação Textual com BERT
 
 ## Visão Geral
 
@@ -236,7 +236,7 @@ Para utilização em sistemas macOS com Apple Silicon, configure `CLASSIFIER_DEV
 ## Estrutura do Projeto
 
 ```
-normie/
+classificador/
 ├── app/
 │   ├── __init__.py              # Inicialização do FastAPI
 │   ├── processor/
@@ -284,7 +284,7 @@ O sistema suporta encerramento gracioso, processando mensagens pendentes antes d
 O sistema implementa logging estruturado com múltiplos níveis:
 
 ### Arquivos de Log
-- `normie_YYYY-MM-DD.log`: logs rotativos diários
+- `classificador_YYYY-MM-DD.log`: logs rotativos diários
 - Localização: `logs/` (configurável via `LOG_DIR`)
 
 ### Níveis de Log
