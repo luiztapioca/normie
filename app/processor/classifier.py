@@ -11,12 +11,12 @@ from ..utils.logging_config import get_logger
 logger = get_logger(__name__)
 
 
-def _classify_batch_worker(batch, model_name):
+def _classify_batch_worker(batch, model_name, device):
     try:
         classifier = pipeline(
             "text-classification",
             model=model_name,
-            device="mps",
+            device=device,
         )
     except Exception as e:
         logger.error("Failed to initialize classifier pipeline: %s", e)
@@ -97,6 +97,7 @@ class BERTClassifier:
         num_workers = 2,
         batch_size = 8,
         poll_timeout = 1,
+        device = "cpu",
     ) -> None:
 
         self.input_queue = input_queue
@@ -106,6 +107,7 @@ class BERTClassifier:
         self.num_workers = num_workers
         self.batch_size = batch_size
         self.poll_timeout = poll_timeout
+        self.device = device
 
         self.redis_client = None
         self._running = False
@@ -170,7 +172,8 @@ class BERTClassifier:
                 executor,
                 _classify_batch_worker,
                 batch,
-                self.model_name
+                self.model_name,
+                self.device
             )
             
             await self._publish_results(results)
