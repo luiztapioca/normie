@@ -1,8 +1,8 @@
-# Normie - Sistema de Classificação Textual com BERT
+# Sistema de Classificação Textual com BERT
 
 ## Visão Geral
 
-Normie é um microsserviço de classificação textual baseado em aprendizado de máquina, projetado para identificar discurso de ódio em textos gerados por usuários. O sistema utiliza o modelo BERT pré-treinado para português (`ruanchaves/bert-base-portuguese-cased-hatebr`) em conjunto com a biblioteca Enelvo para normalização textual, garantindo processamento robusto de conteúdo em linguagem informal.
+Esse é um microsserviço de classificação textual baseado em aprendizado de máquina, projetado para identificar discurso de ódio em textos gerados por usuários. O sistema utiliza o modelo BERT pré-treinado para português (`ruanchaves/bert-base-portuguese-cased-hatebr`) em conjunto com a biblioteca Enelvo para normalização textual, garantindo processamento robusto de conteúdo em linguagem informal.
 
 ## Arquitetura
 
