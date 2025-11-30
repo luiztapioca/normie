@@ -1,0 +1,25 @@
+# Dockerfile for Classifier Service
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy project files
+COPY pyproject.toml /app/
+COPY app/ /app/app/
+COPY run_classifier.py /app/
+
+# Install Python dependencies
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir .
+
+# Create logs directory
+RUN mkdir -p /app/logs
+
+# Run the classifier worker
+CMD ["python", "run_classifier.py"]

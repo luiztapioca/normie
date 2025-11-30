@@ -8,16 +8,23 @@ class Config:
     BASEDIR = os.path.dirname(os.path.abspath(__file__))
     PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
-    IGNORE_LIST: str = os.path.join(BASEDIR, "IGNORE_LIST.txt")
-    FORCE_LIST: str = os.path.join(BASEDIR, "FORCE_LIST.txt")
-    SANITIZE: bool = True
+    # Enelvo Normaliser Configuration
+    IGNORE_LIST: str = os.getenv(
+        "ENELVO_IGNORE_LIST",
+        os.path.join(BASEDIR, "IGNORE_LIST.txt")
+    )
+    FORCE_LIST: str = os.getenv(
+        "ENELVO_FORCE_LIST",
+        os.path.join(BASEDIR, "FORCE_LIST.txt")
+    )
+    SANITIZE: bool = os.getenv("ENELVO_SANITIZE", "true").lower() == "true"
 
     # Redis Configuration
-    REDIS_PORT: int = 6379
-    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = int(os.getenv("REDIS_PORT", "6379"))
+    REDIS_HOST: str = os.getenv("REDIS_HOST", "localhost")
     REDIS_DECODE_RESPONSES: bool = True
-    REDIS_USER: str = "default"
-    REDIS_PASSWORD: str = ""
+    REDIS_USER: str = os.getenv("REDIS_USER", "default")
+    REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "")
     
     # Logging Configuration
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")

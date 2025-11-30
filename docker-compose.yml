@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: normie-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - normie-network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: normie-api
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_USER=default
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - ENABLE_FILE_LOGGING=${ENABLE_FILE_LOGGING:-true}
+      - ENABLE_CONSOLE_LOGGING=${ENABLE_CONSOLE_LOGGING:-true}
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - normie-network
+    restart: unless-stopped
+
+  classifier:
+    build:
+      context: .
+      dockerfile: Dockerfile.classifier
+    container_name: normie-classifier
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_USER=default
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - CLASSIFIER_DEVICE=${CLASSIFIER_DEVICE:-cpu}
+      - MODEL_NAME=${MODEL_NAME:-ruanchaves/bert-base-portuguese-cased-hatebr}
+      - NUM_WORKERS=${NUM_WORKERS:-2}
+      - BATCH_SIZE=${BATCH_SIZE:-8}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - ENABLE_FILE_LOGGING=${ENABLE_FILE_LOGGING:-true}
+      - ENABLE_CONSOLE_LOGGING=${ENABLE_CONSOLE_LOGGING:-true}
+    volumes:
+      - ./logs:/app/logs
+      - model-cache:/root/.cache/huggingface
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - normie-network
+    restart: unless-stopped
+    # Uncomment the following lines if you want to use GPU
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+networks:
+  normie-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  model-cache:
